@@ -5,43 +5,90 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.trans.transpire.R;
 
-public class MapFragment extends Fragment {
-    private SupportMapFragment mapFragment;
+public class MapFragment extends Fragment implements OnMapReadyCallback {
+    private GoogleMap googleMap;
+    public MapView mapView;
+    private boolean mapsSupported = true;
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        super.onCreate(savedInstanceState);
+        MapsInitializer.initialize(getActivity());
+
+        if (mapView != null) {
+            mapView.onCreate(savedInstanceState);
+        }
+        initializeMap();
+    }
+
+    private void initializeMap() {
+        if (googleMap == null && mapsSupported) {
+            mapView = (MapView) getActivity().findViewById(R.id.map);
+            mapView.getMapAsync(this);
+            //setup markers etc...
+//            // to set current location
+//            googleMap.setMyLocationEnabled(true);
+
+            // check if map is created successfully or not
+            if (googleMap == null) {
+                Toast.makeText(getContext(),
+                        "Sorry! unable to create maps", Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.map_fragment, container, false);
+        final LinearLayout parent = (LinearLayout) inflater.inflate(R.layout.map_fragment, container, false);
+        mapView = (MapView) parent.findViewById(R.id.map);
+        return parent;
+    }
 
-        // Remove old code
-        // SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
 
-        // don't recreate fragment everytime ensure last map location/state are maintained
-        if (mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap googleMap) {
-                    LatLng latLng = new LatLng(1.289545, 103.849972);
-                    googleMap.addMarker(new MarkerOptions().position(latLng)
-                            .title("Singapore"));
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                }
-            });
-        }
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+        initializeMap();
+    }
 
-        // R.id.map is a FrameLayout, not a Fragment
-        getChildFragmentManager().beginTransaction().replace(R.id.map, mapFragment).commit();
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
 
-        return rootView;
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
     }
 }

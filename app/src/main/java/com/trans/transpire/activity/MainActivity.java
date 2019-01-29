@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 .into(imgProfile);
 
         // showing dot next to notifications label
-        navigationView.getMenu().getItem(3).setActionView(R.layout.menu_dot);
+//        navigationView.getMenu().getItem(3).setActionView(R.layout.menu_dot);
     }
 
     /***
